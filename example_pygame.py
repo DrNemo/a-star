@@ -6,30 +6,24 @@ size = width, height = 800, 800
 map_size = [22, 22]
 block_size = 32
 point_cofice = xrange(10)
-black = (0, 0, 0)
 
 screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
 
-contener = pygame.Surface([map_size[0] * block_size, map_size[1] * block_size])
-contener.fill(black)
-
-font = pygame.font.SysFont("Verdana", 10)
-
+# generate random map
 x, y = 0, 0
 structure_maps = []
 while(x < map_size[0]):
 	structure_maps.append([])
 	while(y < map_size[1]):
 		cofice = random.choice(point_cofice) * .1
-
-		structure_maps[x].append(cofice)	
-
+		structure_maps[x].append(cofice)
 		y += 1
 	x += 1
 	y = 0
 """
+# static map
 structure_maps = [
 	[1, 1, 1, .5, .2, 0, 0, .2, .5, 1, 1, 1],
 	[1, 1, 1, .5, .2, 0, 0, .2, .5, 1, 1, 1],
@@ -46,13 +40,22 @@ structure_maps = [
 	[1, 1, 1, .5, .2, 0, 0, .2, .5, 1, 1, 1]
 ]
 #"""
+
+map_size = [len(structure_maps), len(structure_maps[1])]
+
+contener = pygame.Surface([map_size[0] * block_size, map_size[1] * block_size])
+contener.fill((0, 0, 0))
+
+font = pygame.font.SysFont("Verdana", 10)
+
+# render map
 x, y = 0, 0
 while(x < len(structure_maps)):
 	while(y < len(structure_maps[0])):
 		cofice = structure_maps[x][y]
 
 		if(cofice):
-			color = (0, 255, 100 - int(100 * cofice)) 
+			color = (0, 255, 100 - int(100 * cofice))
 		else:
 			color = (0, 255, 255)
 
@@ -73,41 +76,73 @@ while(x < len(structure_maps)):
 	x += 1
 	y = 0
 
-
-
+# default point
 start = [1, 1]
 finish = [11, 11]
-astar = AStar.AStar(structure_maps, True).start(start).stop(finish)
 
 clock = pygame.time.Clock()
-
 rect = contener.get_rect()
 offset_x = rect.x = int((width - (block_size * map_size[0])) / 2)
 offset_y = rect.y = int((height - (block_size * map_size[1])) / 2)
 
-move_x, move_y = 0, 0
+# AStar init 
+astar = AStar.AStar(structure_maps, False).start(start).stop(finish)
+
+move_x, move_y = finish
+temp_points = []
 while 1:
-	screen.fill(black)	
+	screen.fill((0, 0, 0))	
 	screen.blit(contener, rect)	
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT: sys.exit()
+		# event move
 		if event.type == pygame.MOUSEMOTION:
 			mx, my = event.pos
 			move_x = mx = math.ceil((mx - offset_x) / block_size)
 			move_y = my = math.ceil((my - offset_y) / block_size)
-			if mx >= 0 and my >= 0:
+			if mx >= 0 and my >= 0 and mx < map_size[0] and my < map_size[1]:
 				finish = [mx, my]
+				# AStar set stop
 				astar.stop(finish)
-				
+			
+		# event click	
 		if event.type == pygame.MOUSEBUTTONDOWN:
 			mx, my = event.pos
 			mx = math.ceil((mx - offset_x) / block_size)
 			my = math.ceil((my - offset_y) / block_size)
-			if mx >= 0 and my >= 0:
+			if mx >= 0 and my >= 0 and mx < map_size[0] and my < map_size[1]:
 				start = [mx, my]
+				# AStar set start
 				astar.start(start)
 
+		# event any key, generate random let
+		if event.type == pygame.KEYDOWN:
+			temp_points = []
+			# AStar clear let
+			astar.clearLets()
+			
+			count = random.randrange(3, 10)
+			while(count):
+				cor = [random.randrange(0, map_size[0]), random.randrange(0, map_size[1])]
+				# AStar set let
+				astar.let(cor)
+
+				temp_points.append(cor)
+				count -= 1
+
+	# render temp_point
+	for temp_point in temp_points:
+		
+		point_block = pygame.Surface([block_size, block_size])
+		point_block.fill((0, 0, 0))
+
+		point_rect = point_block.get_rect()
+		point_rect.x = offset_x + temp_point[0] * block_size
+		point_rect.y = offset_y + temp_point[1] * block_size
+		screen.blit(point_block, point_rect)
+
+	# AStar search path
 	path = astar.search()
 	
 	if path:
@@ -115,6 +150,8 @@ while 1:
 	else:
 		panel_path = pygame.Surface([100, 20])
 	panel_path.fill((225, 225, 225))
+
+	# render path
 	path_step = 0
 	while path:
 		point = path.pop(0)
@@ -147,4 +184,4 @@ while 1:
 			
 	pygame.display.flip()
 
-	clock.tick(60)
+	clock.tick(30)
