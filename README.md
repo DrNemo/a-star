@@ -24,7 +24,7 @@ astar = astar.AStar(structure_maps, diagonal)
 astar.start([2, 1])
 
 #set stop [x, y]
-astar.stop([2, 1]) 
+astar.stop([3, 4]) 
 
 #search path
 path = astar.search() 
