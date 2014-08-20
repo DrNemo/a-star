@@ -7,7 +7,7 @@ example:
 
 ```python
 import astar
-#structure_maps - arrays map[x][y] = float 0-1
+# structure_maps - arrays map[x][y] = float 0-1
 structure_maps = [
 	[1,1,1,0,.5,1],
 	[1,1,.5,0,.5,1]
@@ -15,7 +15,7 @@ structure_maps = [
 	[1,1,.5,0,1,.5]
 	[1,1,.5,0,1,.5]
 ]
-#diagonal - diagonal (True/False)
+# diagonal - diagonal (True/False)
 diagonal = False
 
 astar = astar.AStar(structure_maps, diagonal)
@@ -23,10 +23,16 @@ astar = astar.AStar(structure_maps, diagonal)
 # set start [x, y]
 astar.start([2, 1])
 
-#set stop [x, y]
+# set stop [x, y]
 astar.stop([3, 4]) 
 
-#search path
+# add temp let([corX, corY], patency: float 0-1)
+astar.let([3, 1], 0)
+
+# clear temp lets
+astar.clearLets()
+
+# search path
 path = astar.search() 
 
 while(path):
