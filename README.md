@@ -36,5 +36,5 @@ while(path):
 
 example 2:
 ```
-path = astar.start([2, 1]).stop([2, 1]).search()
+path = astar.start([2, 1]).stop([3, 4]).search()
 ```
