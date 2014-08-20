@@ -5,11 +5,9 @@ algorithm a-star python
 
 example:
 
-structure_maps - arrays map[x][y] = float 0-1
-diagonal - diagonal (True/False)
-
 ```python
 import astar
+#structure_maps - arrays map[x][y] = float 0-1
 structure_maps = [
 	[1,1,1,0,.5,1],
 	[1,1,.5,0,.5,1]
@@ -17,6 +15,7 @@ structure_maps = [
 	[1,1,.5,0,1,.5]
 	[1,1,.5,0,1,.5]
 ]
+#diagonal - diagonal (True/False)
 diagonal = False
 
 astar = astar.AStar(structure_maps, diagonal)
