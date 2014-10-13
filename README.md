@@ -2,6 +2,7 @@ a-star
 ======
 
 algorithm a-star python
+![alt tag](http://style4web.ru/file/a-star.png)
 
 example:
 
