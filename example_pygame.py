@@ -63,9 +63,9 @@ while(x < len(structure_maps)):
 		block.fill(color)
 
 		label = font.render(str(cofice), 1, (255,0,0))
-		block.blit(label, (12, 5))
-		label = font.render(AStar.prefix([x, y]), 1, (255,0,0))
-		block.blit(label, (7, 17))
+		block.blit(label, (8, 5))
+		label = font.render(AStar.AStar.getHashPoint([x, y]), 1, (255,0,0))
+		block.blit(label, (1, 17))
 
 		rect = block.get_rect()
 		rect.x = x * block_size
@@ -121,7 +121,7 @@ while 1:
 			temp_points = []
 			# AStar clear let
 			astar.clearLets()
-			
+
 			count = random.randrange(3, 10)
 			while(count):
 				cor = [random.randrange(0, map_size[0]), random.randrange(0, map_size[1])]
@@ -157,13 +157,13 @@ while 1:
 		point = path.pop(0)
 		point_block = pygame.Surface([block_size, block_size])
 		point_block.fill((255, 0, 0))
-		point_block.set_alpha(50)
+		point_block.set_alpha(100)
 
 		point_rect = point_block.get_rect()
 		point_rect.x = offset_x + point.x * block_size
 		point_rect.y = offset_y + point.y * block_size
 
-		label = font.render(AStar.prefix([move_x, move_y]), 1, (255,0,0))
+		label = font.render(AStar.AStar.getHashPoint([move_x, move_y]), 1, (255,0,0))
 		screen.blit(point_block, point_rect)
 
 		label = font.render("step %s: %s:%s" % (path_step, point.x, point.y) , 1, (255,0,0))
