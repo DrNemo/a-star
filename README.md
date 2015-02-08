@@ -2,6 +2,7 @@ a-star
 ======
 
 algorithm a-star python
+![alt tag](http://style4web.ru/file/a-star.png)
 
 example:
 
@@ -26,11 +27,11 @@ astar.start([2, 1])
 # set stop [x, y]
 astar.stop([3, 4]) 
 
-# add temp let([corX, corY], patency: float 0-1)
-astar.let([3, 1], 0)
-
 # clear temp lets
 astar.clearLets()
+
+# add temp let([corX, corY], patency: float 0-1)
+astar.let([3, 1], 0)
 
 # search path
 path = astar.search() 
