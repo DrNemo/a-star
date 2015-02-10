@@ -5,7 +5,7 @@
 * @copyright 2014 DrNemo
 * @license http://www.opensource.org/licenses/mit-license.html MIT License
 * @author DrNemo <drnemo@bk.ru>
-* @version 1.0 beta
+* @version 1.0
 * 
 * example:
 
@@ -54,6 +54,8 @@ class AStar:
 	point_stop = False
 
 	re_search = True
+
+	path_save = []
 
 	def __init__(self, maps, diagonal = False):
 		self.diagonal = diagonal
@@ -107,6 +109,12 @@ class AStar:
 		if not self.re_search:
 			return self.path_save[::]
 
+		self.find()
+		self.re_search = False
+
+		return self.search()
+
+	def find(self):
 		self.path_save = []
 		open_point = [self.point_start]
 		open_point_hash = {self.point_start.prefix : True}
@@ -118,8 +126,7 @@ class AStar:
 
 			if self.isFinish(point):
 				self.path_save = self.reverse(point)
-				self.re_search = False
-				return self.search()
+				break
 
 			else:
 				if point.prefix in open_point_hash:
@@ -131,11 +138,9 @@ class AStar:
 					point_temp = new_points.pop(0)
 					point_hash = self.getHashPoint(point_temp)
 
-					cofice = self.maps[point_hash]
-					if point_hash in self.maps_temp:
-						cofice = self.maps_temp[point_hash]
+					cofice = self.getCofice(point_temp)
 					
-					if point_hash in close_point or point_hash in open_point_hash or cofice == 0:
+					if point_hash in close_point or point_hash in open_point_hash:
 						continue
 
 					if point_temp[2]:
@@ -150,6 +155,14 @@ class AStar:
 					open_point_hash[point_hash] = True
 
 				close_point[point.prefix] = True
+
+	def getCofice(self, point):
+		point_hash = self.getHashPoint(point)
+		cofice = self.maps[point_hash]
+		if point_hash in self.maps_temp:
+			cofice = self.maps_temp[point_hash]
+
+		return cofice
 
 	def isFinish(self, point):
 		return point.x == self.point_stop.x and point.y == self.point_stop.y
@@ -190,7 +203,7 @@ class AStar:
 		valide_point = []
 		while new_points:
 			point = new_points.pop(0)
-			if self.pointInMap(point):
+			if self.pointInMap(point) and self.getCofice(point) > 0:
 				valide_point.append(point)
 
 		return valide_point
@@ -204,7 +217,7 @@ class AStar:
 				point = point.parent
 			else:
 				point = False
-
+		
 		return stek[::-1]
 
 class Point:
