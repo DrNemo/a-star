@@ -99,20 +99,17 @@ class AStar:
 		return self
 
 	def pointInMap(self, cor):
-		if self.getHashPoint(cor) in self.maps:
-			return True
-		return False
+		return self.getHashPoint(cor) in self.maps
 
 	def search(self):
 		if not self.point_start or not self.point_stop:
 			raise Exception('No starting point or finish')
-		if not self.re_search:
-			return self.path_save[::]
 
-		self.find()
-		self.re_search = False
+		if self.re_search:
+			self.find()
+			self.re_search = False
 
-		return self.search()
+		return self.path_save[::]
 
 	def find(self):
 		self.path_save = []
@@ -125,36 +122,33 @@ class AStar:
 			point = open_point.pop(0)
 
 			if self.isFinish(point):
-				self.path_save = self.reverse(point)
+				self.reverse(point)
 				break
-
-			else:
-				if point.prefix in open_point_hash:
-					del open_point_hash[point.prefix]	
 			
-				new_points = self.getVariantPoint(point)
-
-				while new_points:
-					point_temp = new_points.pop(0)
-					point_hash = self.getHashPoint(point_temp)
-
-					cofice = self.getCofice(point_temp)
-					
-					if point_hash in close_point or point_hash in open_point_hash:
-						continue
-
-					if point_temp[2]:
-						g = point.g + int(10 * cofice)
-					else:
-						g = point.g + int(14 * cofice)
-
-					h = self.hFabric(point_temp)
-					f = int(g + h)
+			if point.prefix in open_point_hash:
+				del open_point_hash[point.prefix]	
+		
+			new_points = self.getVariantPoint(point)
+			while new_points:
+				point_temp = new_points.pop(0)
+				point_hash = self.getHashPoint(point_temp)
 				
-					open_point.append( Point(point_temp, g, h, f, point) )
-					open_point_hash[point_hash] = True
+				if point_hash in close_point or point_hash in open_point_hash:
+					continue
 
-				close_point[point.prefix] = True
+				cofice = self.getCofice(point_temp)
+
+				if point_temp[2]:
+					g = point.g + int(10 * cofice)
+				else:
+					g = point.g + int(14 * cofice)
+
+				h = self.hFabric(point_temp)
+			
+				open_point.append( Point(point_temp, g, h, point) )
+				open_point_hash[point_hash] = True
+
+			close_point[point.prefix] = True
 
 	def getCofice(self, point):
 		point_hash = self.getHashPoint(point)
@@ -213,19 +207,16 @@ class AStar:
 		point = point.parent
 		while point:
 			stek.append(point)
-			if point.parent:
-				point = point.parent
-			else:
-				point = False
+			point = point.parent
 		
-		return stek[::-1]
+		self.path_save = stek[::-1]
 
 class Point:
-	def __init__(self, cor, g = 0, h = 0, f = 0, parent = False):
+	def __init__(self, cor, g = 0, h = 0, parent = False):
 		self.x = int(cor[0])
 		self.y = int(cor[1])
 		self.prefix = AStar.getHashPoint([self.x, self.y])
 		self.parent = parent
 		self.g = int(g)
 		self.h = int(h)
-		self.f = int(f)
+		self.f = int(g + h)
