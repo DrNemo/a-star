@@ -45,178 +45,181 @@ while(path):
 path = astar.start([2, 1]).stop([2, 1]).search()
 """
 
+
 class AStar:
-	maps_temp = {}
+    maps_temp = {}
 
-	H_CALCULAT_MANHETON = False
+    H_CALCULAT_MANHETON = False
 
-	point_start = False
-	point_stop = False
+    point_start = False
+    point_stop = False
 
-	re_search = True
+    re_search = True
 
-	path_save = []
+    path_save = []
 
-	def __init__(self, maps, diagonal = False):
-		self.diagonal = diagonal
-		self.width = len(maps)
-		self.height = len(maps[0])
-		
-		# generate hash map
-		self.maps = {}
-		for x in xrange(0, self.width):
-			for y in xrange(0, self.height):
-				self.maps[self.getHashPoint([x, y])] = maps[x][y]
+    def __init__(self, maps, diagonal=False):
+        self.diagonal = diagonal
+        self.width = len(maps)
+        self.height = len(maps[0])
 
-	@staticmethod
-	def getHashPoint(cor):
-		return "%i:%i" % (cor[0], cor[1])
+        # generate hash map
+        self.maps = {}
+        for x in xrange(0, self.width):
+            for y in xrange(0, self.height):
+                self.maps[self.getHashPoint([x, y])] = maps[x][y]
 
-	def let(self, cor, cofice = 0):		
-		self.maps_temp[self.getHashPoint(cor)] = cofice
-		self.re_search = True
-		return self
+    @staticmethod
+    def getHashPoint(cor):
+        return "%i:%i" % (cor[0], cor[1])
 
-	def clearLets(self):
-		self.re_search = True
-		self.maps_temp = {}
-		return self
+    def let(self, cor, cofice=0):
+        self.maps_temp[self.getHashPoint(cor)] = cofice
+        self.re_search = True
+        return self
 
-	def start(self, cor):
-		if not self.pointInMap(cor):			
-			raise Exception('Coordinates outside the map area')
+    def clearLets(self):
+        self.re_search = True
+        self.maps_temp = {}
+        return self
 
-		self.re_search = True
-		self.point_start = Point(cor)
-		return self
+    def start(self, cor):
+        if not self.pointInMap(cor):
+            raise Exception('Coordinates outside the map area')
 
-	def stop(self, cor):
-		if not self.pointInMap(cor):
-			raise Exception('Coordinates outside the map area')
+        self.re_search = True
+        self.point_start = Point(cor)
+        return self
 
-		self.re_search = True
-		self.point_stop = Point(cor)
-		return self
+    def stop(self, cor):
+        if not self.pointInMap(cor):
+            raise Exception('Coordinates outside the map area')
 
-	def pointInMap(self, cor):
-		return self.getHashPoint(cor) in self.maps
+        self.re_search = True
+        self.point_stop = Point(cor)
+        return self
 
-	def search(self):
-		if not self.point_start or not self.point_stop:
-			raise Exception('No starting point or finish')
+    def pointInMap(self, cor):
+        return self.getHashPoint(cor) in self.maps
 
-		if self.re_search:
-			self.find()
-			self.re_search = False
+    def search(self):
+        if not self.point_start or not self.point_stop:
+            raise Exception('No starting point or finish')
 
-		return self.path_save[::]
+        if self.re_search:
+            self.find()
+            self.re_search = False
 
-	def find(self):
-		self.path_save = []
-		open_point = [self.point_start]
-		open_point_hash = {self.point_start.prefix : True}
-		close_point = {}
-		
-		while open_point:
-			open_point.sort(key=lambda x: x.f, reverse=False)
-			point = open_point.pop(0)
+        return self.path_save[::]
 
-			if self.isFinish(point):
-				self.reverse(point)
-				break
-			
-			if point.prefix in open_point_hash:
-				del open_point_hash[point.prefix]	
-		
-			new_points = self.getVariantPoint(point)
-			while new_points:
-				point_temp = new_points.pop(0)
-				point_hash = self.getHashPoint(point_temp)
-				
-				if point_hash in close_point or point_hash in open_point_hash:
-					continue
+    def find(self):
+        open_point = [self.point_start]
+        open_point_hash = {self.point_start.prefix: True}
+        close_point = {}
 
-				cofice = self.getCofice(point_temp)
+        while open_point:
+            open_point.sort(key=lambda x: x.f, reverse=False)
+            point = open_point.pop(0)
 
-				if point_temp[2]:
-					g = point.g + int(10 * cofice)
-				else:
-					g = point.g + int(14 * cofice)
+            if self.isFinish(point):
+                self.reverse(point)
+                break
 
-				h = self.hFabric(point_temp)
-			
-				open_point.append( Point(point_temp, g, h, point) )
-				open_point_hash[point_hash] = True
+            if point.prefix in open_point_hash:
+                del open_point_hash[point.prefix]
 
-			close_point[point.prefix] = True
+            new_points = self.getVariantPoint(point)
+            while new_points:
+                point_temp = new_points.pop(0)
+                point_hash = self.getHashPoint(point_temp)
 
-	def getCofice(self, point):
-		point_hash = self.getHashPoint(point)
-		cofice = self.maps[point_hash]
-		if point_hash in self.maps_temp:
-			cofice = self.maps_temp[point_hash]
+                if point_hash in close_point or point_hash in open_point_hash:
+                    continue
 
-		return cofice
+                cofice = self.getCofice(point_temp)
 
-	def isFinish(self, point):
-		return point.x == self.point_stop.x and point.y == self.point_stop.y
+                if point_temp[2]:
+                    g = point.g + int(10 * cofice)
+                else:
+                    g = point.g + int(14 * cofice)
 
-	def hFabric(self, point):
-		if self.H_CALCULAT_MANHETON:
-			return self.hManhattan(point)
-		else:
-			return self.hShortcut(point)
+                h = self.hFabric(point_temp)
 
-	def hManhattan(self, point):
-		return 10 * (abs(point[0] - self.point_stop.x) + abs(point[1] - self.point_stop.y))
+                open_point.append(Point(point_temp, g, h, point))
+                open_point_hash[point_hash] = True
 
-	def hShortcut(self, point):
-		x_distance = abs(point[0] - self.point_stop.x)
-		y_distance = abs(point[1] - self.point_stop.y)
-		if x_distance > y_distance:
-			h = 14 * y_distance + 10 * (x_distance - y_distance)
-		else:
-			h = 14 * x_distance + 10 * (y_distance - x_distance)
-		return h
-	
-	def getVariantPoint(self, point):
-		new_points = [
-			[point.x    , point.y - 1, True],
-			[point.x + 1, point.y    , True],
-			[point.x    , point.y + 1, True],
-			[point.x - 1, point.y    , True]
-		]
-		if(self.diagonal):
-			new_points += [
-				[point.x - 1, point.y - 1, False],
-				[point.x + 1, point.y - 1, False],
-				[point.x + 1, point.y + 1, False],
-				[point.x - 1, point.y + 1, False]
-			]
-		
-		valide_point = []
-		while new_points:
-			point = new_points.pop(0)
-			if self.pointInMap(point) and self.getCofice(point) > 0:
-				valide_point.append(point)
+            close_point[point.prefix] = True
 
-		return valide_point
+    def getCofice(self, point):
+        point_hash = self.getHashPoint(point)
+        cofice = self.maps[point_hash]
+        if point_hash in self.maps_temp:
+            cofice = self.maps_temp[point_hash]
 
-	def reverse(self, point):
-		stek = [point]
-		point = point.parent
-		while point:
-			stek.append(point)
-			point = point.parent
-		
-		self.path_save = stek[::-1]
+        return cofice
+
+    def isFinish(self, point):
+        return point.x == self.point_stop.x and point.y == self.point_stop.y
+
+    def hFabric(self, point):
+        if self.H_CALCULAT_MANHETON:
+            return self.hManhattan(point)
+        else:
+            return self.hShortcut(point)
+
+    def hManhattan(self, point):
+        return 10 * (abs(point[0] - self.point_stop.x) + abs(point[1] - self.point_stop.y))
+
+    def hShortcut(self, point):
+        x_distance = abs(point[0] - self.point_stop.x)
+        y_distance = abs(point[1] - self.point_stop.y)
+        if x_distance > y_distance:
+            h = 14 * y_distance + 10 * (x_distance - y_distance)
+        else:
+            h = 14 * x_distance + 10 * (y_distance - x_distance)
+        return h
+
+    def getVariantPoint(self, point):
+        new_points = [
+            [point.x    , point.y - 1, True],
+            [point.x + 1, point.y    , True],
+            [point.x    , point.y + 1, True],
+            [point.x - 1, point.y    , True]
+        ]
+        if(self.diagonal):
+            new_points += [
+                [point.x - 1, point.y - 1, False],
+                [point.x + 1, point.y - 1, False],
+                [point.x + 1, point.y + 1, False],
+                [point.x - 1, point.y + 1, False]
+            ]
+
+        valide_point = []
+        while new_points:
+            point = new_points.pop(0)
+            if self.pointInMap(point) and self.getCofice(point) > 0:
+                valide_point.append(point)
+
+        return valide_point
+
+    def reverse(self, point):    	
+        self.path_save = []
+        stek = [point]
+        point = point.parent
+        while point:
+            stek.append(point)
+            point = point.parent
+
+        self.path_save = stek[::-1]
+
 
 class Point:
-	def __init__(self, cor, g = 0, h = 0, parent = False):
-		self.x = int(cor[0])
-		self.y = int(cor[1])
-		self.prefix = AStar.getHashPoint([self.x, self.y])
-		self.parent = parent
-		self.g = int(g)
-		self.h = int(h)
-		self.f = int(g + h)
+
+    def __init__(self, cor, g=0, h=0, parent=False):
+        self.x = int(cor[0])
+        self.y = int(cor[1])
+        self.prefix = AStar.getHashPoint([self.x, self.y])
+        self.parent = parent
+        self.g = int(g)
+        self.h = int(h)
+        self.f = int(g + h)
